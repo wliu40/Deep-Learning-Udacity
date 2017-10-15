@@ -19,7 +19,7 @@ dropout = 0.75  # Dropout, probability to keep units
 
 # Store layers weight & bias
 weights = {
-    'wc1': tf.Variable(tf.random_normal([5, 5, 1, 32])), #filter hight,width,input_depth, output_depth
+    'wc1': tf.Variable(tf.random_normal([5, 5, 1, 32])), #filter hight,width,input_depth(color channel), output_depth
     'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
     'wd1': tf.Variable(tf.random_normal([7*7*64, 1024])),
     'out': tf.Variable(tf.random_normal([1024, n_classes]))}
@@ -32,6 +32,8 @@ biases = {
 
 
 def conv2d(x, W, b, strides=1):
+	#strides = [batch, input_height, input_width, input_channels]. 
+	#We are generally always going to set the stride for batch and input_channels (i.e. the first and fourth element in the strides array) to be 1.
     x = tf.nn.conv2d(x, W, strides=[1, strides, strides, 1], padding='SAME')
     x = tf.nn.bias_add(x, b)
     return tf.nn.relu(x)
@@ -69,8 +71,8 @@ keep_prob = tf.placeholder(tf.float32)
 logits = conv_net(x, weights, biases, keep_prob)
 
 # Define loss and optimizer
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y))
-optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(cost)
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y)) ##交叉熵
+optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(cost) ##GSD
 
 # Accuracy
 correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1))
